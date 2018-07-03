@@ -320,18 +320,279 @@ _Since references point to the values themselves and not to the variables, you c
 
 ```js
 function foo(x) {
-	x.push( 4 );
-	x; // [1,2,3,4]
+    x.push( 4 );
+    x; // [1,2,3,4]
 
-	// later
-	x = [4,5,6];
-	x.push( 7 );
-	x; // [4,5,6,7]
+    // later
+    x = [4,5,6];
+    x.push( 7 );
+    x; // [4,5,6,7]
 }
 
 var a = [1,2,3];
 
-foo( a );
+foo(a);
 
 a; // [1,2,3,4]  not  [4,5,6,7]
+```
+
+## Natives
+
+Here's a list of the most commonly used natives:
+
+* `String()`
+* `Number()`
+* `Boolean()`
+* `Array()`
+* `Object()`
+* `Function()`
+* `RegExp()`
+* `Date()`
+* `Error()`
+* `Symbol()` -- added in ES6!
+
+1. 
+    In general, there's basically no reason to use the object form directly. It's better to just let the boxing happen implicitly where necessary. In other words, never do things like `new String("abc")`, `new Number(42)`, etc -- always prefer using the literal primitive values `"abc"` and `42`.
+    (Performance reason)
+
+2. 
+    `Array()`, `Object()` and `Function()` are optional.
+
+3.
+    `RegExp()`, `Date()` and `Error()` are recommended.
+
+## Coersion
+
+Falsy values in JS:
+
+* `undefined`
+* `null`
+* `false`
+* `+0`, `-0`, and `NaN`
+* `""`
+
+Truthy values: Everything that is not falsy. ([], {}, function(){}...)
+
+### Implicit coersion:
+
+####  + operator in JS
+1. Basic
+    * Strings concatenation:
+    ```js
+    var result = "Hello, " + "World!"; //"Hello, World!"
+    ```
+    * Numbers arithmetic addition:
+    ```js
+    var result = 10 + 5; //15
+    ```
+2. Conversion rules
+    > operand + operand = result 
+* If at least one operand is an object, it is converted to a primitive value (string, number or boolean);
+* After conversion, if at least one operand is string type, the second operand is converted to string and the concatenation is executed;
+* In other case both operands are converted to numbers and arithmetic addition is executed.
+ 
+**3. Object to primitive**
+* If object type is Date, then toString() method is used;
+* In other case valueOf() method is used, if it returns a primitive value;
+* In other case (if valueOf() doesn't exist or doesn't return a primitive value), then toString() method is used. This happens most of the times.
+
+
+_Example 1: Number and string_
+
+```js
+var result = 1 + "5"; // "15" 
+```
+
+Explanation:
+
+    1. 1 + "1" (The second operand is a string and based on rule 2 the number 1 becomes "1")
+    2. "1" + "1" (Strings concatenation)
+    3. "15"
+
+The second operand is a string. The first operand is converted from number to string and the concatenation is done.
+
+_Example 2: Number and array_
+
+```js
+var result = [1, 3, 5] + 1; //"1,3,51"  
+```
+
+Explanation:
+
+    1. [1, 3, 5] + 1 (Using the rule 1, transform the array [1, 3, 5] to a primitive value: "1,3,5")
+    2. "1,3,5" + 1 (Using the rule 2, transform the number 1 to a string "1")
+    3. "1,3,5" + "1" (Strings concatenation)
+    4. "1,3,51"
+
+The first operand is an array, so it is transformed to a primitive string value. At next step the number operand is transformed to string. Then the concatenation between 2 strings is done.
+
+_Example 3: Number and boolean_
+
+```js
+var result = 10 + true; //11 
+```
+
+Explanation:
+
+    1. 10 + true (Based on rule 3 convert the boolean true to a number 1)
+    2. 10 + 1 (Sum two numbers)
+    3. 11
+
+Because neither of the operands is a string, the boolean is converted to number. Then the arithmetic addition is performed.
+
+_Example 4: Number and object_
+
+```js
+var result = 15 + {}; // "15[object Object]" 
+```
+
+Explanation:
+
+    1. "15 + {}" (The second operand is an object. Apply the rule 1 and the object to primitive is a string "[object Object]")
+    2. 15 + "[object Object]" (Using rule 2 transform the number 15 to a string "15")
+    3. "15" + "[object Object]" (Strings concatenation)
+    4. "15[object Object]"
+
+The second object operand is converted to a string value. Because valueOf() method returns the object itself and not a primitive value, the toString() method is used, which returns string. 
+
+The second operand is now a string, thus the number is converted to string too. The concatenation of 2 strings is executed.
+
+_Example 5: Number and null_
+
+```js
+var result = 8 + null; // 8
+```
+
+Explanation:
+
+    1. 8 + null (Because none of the operands is string, convert the null to a number 0 based on rule 3)
+    2. 8 + 0 (Numbers addition)
+    3. 8
+
+Because operands are not objects or strings, null is converted to number. Then numbers sum is evaluated.
+
+_Example 6: String and null_
+
+```js
+var result = "queen" + null; // "queennull"
+```
+
+Explanation:
+
+    1. "queen" + null (Because none first operand is string, convert the null to a string "null" based on rule 2)
+    2. "queen" + "null" (Strings concatenation)
+    3. "queennull"
+
+Because the first operand is a string, null is converted to string. Then the strings concatenation is done.
+
+_Example 7: Number and undefined_
+
+```js
+var result = 12 + undefined; // NaN  
+```
+
+Explanation:
+
+    1. 12 + undefined (Because none of the operands is string, convert the undefined to a number NaN based on rule 3)
+    2. 12 + NaN (Numbers addition)
+    3. NaN
+
+Because neither of the operands is object or string, undefined is converted to number: NaN. Making an addition between number and NaN evaluates always to NaN.
+
+#### Operators `||` and `&&`
+
+Unlike logic operator in other language (java, C++), they are more like "operand selector operators" in JS.
+> The value produced by a && or || operator is not necessarily of type Boolean. The value produced will always be the value of one of the two operand expressions.
+
+Let's illustrate:
+
+```js
+var a = 42;
+var b = "abc";
+var c = null;
+
+a || b;		// 42
+a && b;		// "abc"
+
+c || b;		// "abc"
+c && b;		// null
+```
+
+Both `||` and `&&` operators perform a `boolean` test on the **first operand** (`a` or `c`). If the operand is not already `boolean` (as it's not, here), a normal `ToBoolean` coercion occurs, so that the test can be performed.
+
+For the `||` operator, if the test is `true`, the `||` expression results in the value of the *first operand* (`a` or `c`). If the test is `false`, the `||` expression results in the value of the *second operand* (`b`).
+
+Inversely, for the `&&` operator, if the test is `true`, the `&&` expression results in the value of the *second operand* (`b`). If the test is `false`, the `&&` expression results in the value of the *first operand* (`a` or `c`).
+
+### Loose Equals Versus Strict Equals
+
+>"== allows coercion in the equality comparison and === disallows coercion.”
+
+(`NaN` is never equal to itself;
+ `+0` and `-0` are equal to each other)
+
+1. Comparing: anything to `boolean`
+```js
+var a = "42";
+
+// bad (will fail!):
+if (a == true) {
+	// ..
+}
+
+// also bad (will fail!):
+if (a === true) {
+	// ..
+}
+
+// good enough (works implicitly):
+if (a) {
+	// ..
+}
+
+// better (works explicitly):
+if (!!a) {
+	// ..
+}
+
+// also great (works explicitly):
+if (Boolean( a )) {
+	// ..
+}
+```
+
+2. Comparing: `null`s to `undefined`s
+
+> 1. If x is null and y is undefined, return true.
+> 2. If x is undefined and y is null, return true.
+
+```js
+var a = null;
+var b;
+
+a == b;		// true
+a == null;	// true
+b == null;	// true
+
+a == false;	// false
+b == false;	// false
+a == "";	// false
+b == "";	// false
+a == 0;		// false
+b == 0;		// false
+```
+
+3. Comparing: `object`s to non-`object`s
+
+> 8. If Type(x) is either String or Number and Type(y) is Object,
+>    return the result of the comparison x == ToPrimitive(y).
+> 9. If Type(x) is Object and Type(y) is either String or Number,
+>    return the result of the comparison ToPrimitive(x) == y.
+
+```js
+var a = "abc";
+var b = Object( a );	// same as `new String( a )`
+
+a === b;				// false
+a == b;					// true
 ```
