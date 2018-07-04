@@ -596,3 +596,169 @@ var b = Object( a );	// same as `new String( a )`
 a === b;				// false
 a == b;					// true
 ```
+
+**1. If either side of the comparison can have `true` or `false` values, don't ever, EVER use `==`.
+2. If either side of the comparison can have `[]`, `""`, or `0` values, seriously consider not using `==`.**
+
+
+##Syntax
+.....
+
+# This and Object Prototype
+
+## This keyword
+
+### Definition:
+
+`this` is a binding that is made when a function is invoked, and *what* it references is determined entirely by the call-site where the function is called.
+
+call-site: the location in code where a function is called (not where it’s declared).
+
+### Rules:
+
+#### Default Binding
+
+Default binding refers to how `this` is the global context whenever a function is invoked without any of these other rules. If we aren't using a dot and we aren't using `call()`, `apply()`, or `bind()`, our this will be our global object.
+
+Your global context depends on where you're working. If you're in the browser, this will be the window. When programming in strict mode, the global context is undefined.
+
+```js
+function foo() {
+	console.log( this.a );
+}
+
+var a = 2;
+
+foo(); // 2
+```
+
+```js
+function foo() {
+	"use strict";
+
+	console.log( this.a );
+}
+
+var a = 2;
+
+foo(); // TypeError: `this` is `undefined`
+```
+
+#### Implicit Binding
+
+Implicit binding occurs when dot notation is used to invoke a function.
+In implicit binding, **whatever is to the left of the dot** becomes the context for this in the function.
+
+```js
+function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2,
+	foo: foo
+};
+
+obj.foo(); // 2
+```
+
+#### Explicit Binding
+
+Explicit binding of this occurs when `.call()`, `.apply()`, or `.bind()` are used on a function.
+
+```js
+function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
+```
+
+##### bind()
+
+When called on a function, .bind() sets a this context and returns a new function of the same name with a bound this context.
+
+```js
+function foo(something) {
+	console.log( this.a, something );
+	return this.a + something;
+}
+
+var obj = {
+	a: 2
+};
+
+var bar = foo.bind( obj );
+
+var b = bar( 3 ); // 2 3
+console.log( b ); // 5
+```
+
+#### new binding
+
+When a function is invoked with `new` in front of it, otherwise known as a constructor call, the following things are done automatically:
+
+1. a brand new object is created (aka, constructed) out of thin air
+2. *the newly constructed object is `[[Prototype]]`-linked*
+3. the newly constructed object is set as the `this` binding for that function call
+4. unless the function returns its own alternate **object**, the `new`-invoked function call will *automatically* return the newly constructed object.
+
+```js
+function foo(a) {
+    this.a = a;
+}
+
+var bar = new foo( 2 );
+console.log( bar.a ); // 2
+```
+
+#### Determining `this`
+
+1. Is the function called with `new` (**new binding**)? If so, `this` is the newly constructed object.
+
+    `var bar = new foo()`
+
+2. Is the function called with `call` or `apply` (**explicit binding**), even hidden inside a `bind` *hard binding*? If so, `this` is the explicitly specified object.
+
+    `var bar = foo.call( obj2 )`
+
+3. Is the function called with a context (**implicit binding**), otherwise known as an owning or containing object? If so, `this` is *that* context object.
+
+    `var bar = obj1.foo()`
+
+4. Otherwise, default the `this` (**default binding**). If in `strict mode`, pick `undefined`, otherwise pick the `global` object.
+
+    `var bar = foo()`
+
+#### `this` in arrow function
+
+Instead of using the four standard `this` rules, arrow-functions adopt the `this` binding from the enclosing (function or global) scope.
+
+Let's illustrate arrow-function lexical scope:
+
+```js
+function foo() {
+	// return an arrow function
+	return (a) => {
+		// `this` here is lexically adopted from `foo()`
+		console.log( this.a );
+	};
+}
+
+var obj1 = {
+	a: 2
+};
+
+var obj2 = {
+	a: 3
+};
+
+var bar = foo.call( obj1 );
+bar.call( obj2 ); // 2, not 3!
+```
+
+## Object
