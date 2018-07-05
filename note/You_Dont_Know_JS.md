@@ -762,3 +762,127 @@ bar.call( obj2 ); // 2, not 3!
 ```
 
 ## Object
+
+### Build-in Object
+
+* `String`
+* `Number`
+* `Boolean`
+* `Object`
+* `Function`
+* `Array`
+* `Date`
+* `RegExp`
+* `Error`
+
+### Content
+
+```js
+var myObject = {
+	a: 2
+};
+
+myObject.a;		// 2
+
+myObject["a"];	// 2
+```
+
+property access: 
+* `.` operator: take compatible property name.
+* `[ ]` operator: uses a string's **value** to specify the location(UTF-8/unicode).
+
+In objects, property names are **always** strings. If you use any other value besides a `string` (primitive) as the property, it will first be converted to a string.
+
+### method
+In JS, funtion or method would belong to a object, even when declare a function expression as part of the object-literal.
+
+```js
+var myObject = {
+	foo: function foo() {
+		console.log( "foo" );
+	}
+};
+
+var someFoo = myObject.foo;
+
+someFoo;		// function foo(){..}
+
+myObject.foo;	// function foo(){..}
+```
+
+### copy object
+
+`Object.assign(..)`
+
+```js
+var newObj = Object.assign( {}, myObject );
+
+newObj.a;						// 2
+newObj.b === anotherObject;		// true
+newObj.c === anotherArray;		// true
+newObj.d === anotherFunction;	// true
+```
+
+### Property Descriptors
+
+```js
+var myObject = {
+	a: 2
+};
+
+Object.getOwnPropertyDescriptor( myObject, "a" );
+// {
+//    value: 2,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+// }
+```
+
+#### writable 
+
+The ability for you to change the value of a property is controlled by writable.
+
+Change of this characteristic will only reflect in strict mod.
+
+```js
+"use strict";
+
+var myObject = {};
+
+Object.defineProperty( myObject, "a", {
+	value: 2,
+	writable: false, // not writable!
+	configurable: true,
+	enumerable: true
+} );
+
+myObject.a = 3; // TypeError
+```
+
+#### Configurable
+
+1. configurable: we can modify its descriptor definition, using the same defineProperty(..)
+    * changing configurable to false is a one-way action
+1. configurable: false prevents is the ability to use the delete operator to remove an existing property.
+
+#### Enumerable
+
+this characteristic controls whether a property will show up in certain object-property enumerations, such as the for..in loop.
+
+### Iteration
+
+ES6: for..of loop syntax for iterating over arrays (and objects, if the object defines its own custom iterator):
+
+```js
+var myArray = [ 1, 2, 3 ];
+
+for (var v of myArray) {
+	console.log( v );
+}
+// 1
+// 2
+// 3
+```
+
+## Class in JS
