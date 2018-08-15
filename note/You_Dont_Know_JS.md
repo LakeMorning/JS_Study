@@ -624,7 +624,7 @@ Your global context depends on where you're working. If you're in the browser, t
 
 ```js
 function foo() {
-	console.log( this.a );
+    console.log( this.a );
 }
 
 var a = 2;
@@ -634,9 +634,8 @@ foo(); // 2
 
 ```js
 function foo() {
-	"use strict";
-
-	console.log( this.a );
+    "use strict";
+    console.log( this.a );
 }
 
 var a = 2;
@@ -651,12 +650,12 @@ In implicit binding, **whatever is to the left of the dot** becomes the context 
 
 ```js
 function foo() {
-	console.log( this.a );
+    console.log( this.a );
 }
 
 var obj = {
-	a: 2,
-	foo: foo
+    a: 2,
+    foo: foo
 };
 
 obj.foo(); // 2
@@ -668,11 +667,11 @@ Explicit binding of this occurs when `.call()`, `.apply()`, or `.bind()` are use
 
 ```js
 function foo() {
-	console.log( this.a );
+    console.log( this.a );
 }
 
 var obj = {
-	a: 2
+    a: 2
 };
 
 foo.call( obj ); // 2
@@ -684,12 +683,12 @@ When called on a function, .bind() sets a this context and returns a new functio
 
 ```js
 function foo(something) {
-	console.log( this.a, something );
-	return this.a + something;
+    console.log( this.a, something );
+    return this.a + something;
 }
 
 var obj = {
-	a: 2
+    a: 2
 };
 
 var bar = foo.bind( obj );
@@ -886,3 +885,6 @@ for (var v of myArray) {
 ```
 
 ## Class in JS
+
+# Asynchronous JavaScript
+
